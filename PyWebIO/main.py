@@ -1,6 +1,10 @@
 from pywebio.input import input, input_group, TEXT, select
 from pywebio.output import put_text, put_table, put_html, put_markdown, style, put_buttons
 from pywebio.platform.tornado import start_server
+from pywebio.input import actions
+from openpyxl import Workbook
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 # Banco de dados simulado
 categorias = [
@@ -29,7 +33,6 @@ itens = [
     {"categoria": "Equipamentos de Segurança", "nome": "Botina", "quantidade": "15"},
 ]
 
-# Função para exibir cabeçalho estilizado
 def exibir_cabecalho():
     put_html("""
     <h1 style="text-align: center; color: #4CAF50; font-family: Arial;">
@@ -40,12 +43,16 @@ def exibir_cabecalho():
 
 # Função para login
 def login():
-    user = input("Usuário: ", type=TEXT)
-    if user.lower() == "admin":
+    credenciais = {"admin": "12345"}  
+    user = input("Usuário:", type=TEXT)
+    senha = input("Senha:", type=TEXT)
+    if user in credenciais and credenciais[user] == senha:
+        style(put_text(f'✅ Bem-vindo, {user}!'), 'color: green; font-weight: bold;')
         return True
     else:
-        style(put_text("Usuário inválido. Tente novamente."), 'color: red; font-weight: bold;')
+        style(put_text("❌ Usuário ou senha inválidos. Tente novamente."), 'color: red; font-weight: bold;')
         return False
+
 
 # Funções de operações
 def criar_categoria():
@@ -68,15 +75,12 @@ def exibir_estoque():
     if not itens:
         put_text("⚠️ O estoque está vazio.")
     else:
-        # Ordena a lista de itens pela categoria
         itens_ordenados = sorted(itens, key=lambda item: item["categoria"])
         
-        # Cria a tabela com cabeçalho
         table_data = [["Categoria", "Item", "Quantidade"]]
         for item in itens_ordenados:
             table_data.append([item["categoria"], item["nome"], item["quantidade"]])
         
-        # Exibe a tabela
         put_table(table_data)
 
 def listar_categorias():
@@ -95,8 +99,18 @@ def remover_item():
         return
 
     item_nome = input("Digite o nome do item que deseja remover:", type=TEXT)
-    itens = [item for item in itens if item["nome"].lower() != item_nome.lower()]
-    style(put_text(f'❌ Item "{item_nome}" removido com sucesso.'), 'color: red; font-weight: bold;')
+    item = next((i for i in itens if i["nome"].lower() == item_nome.lower()), None)
+    if not item:
+        style(put_text(f'⚠️ Item "{item_nome}" não encontrado.'), 'color: orange; font-weight: bold;')
+        return
+
+    confirmacao = actions(
+        f'Tem certeza de que deseja remover "{item_nome}"?',
+        buttons=[{'label': 'Sim', 'value': 'yes'}, {'label': 'Não', 'value': 'no'}]
+    )
+    if confirmacao == 'yes':
+        itens = [i for i in itens if i["nome"].lower() != item_nome.lower()]
+        style(put_text(f'❌ Item "{item_nome}" removido com sucesso.'), 'color: red; font-weight: bold;')
 
 def atualizar_item():
     global itens
@@ -115,6 +129,52 @@ def atualizar_item():
             return
     style(put_text(f'⚠️ Item "{item_nome}" não encontrado.'), 'color: orange; font-weight: bold;')
 
+def pesquisar_item():
+    if not itens:
+        style(put_text("⚠️ O estoque está vazio."), 'color: orange; font-weight: bold;')
+        return
+
+    pesquisa = input("Digite o nome ou parte do nome do item:", type=TEXT)
+    resultados = [item for item in itens if pesquisa.lower() in item["nome"].lower()]
+    
+    if resultados:
+        put_markdown("### Resultados da Pesquisa:")
+        put_table([["Categoria", "Item", "Quantidade"]] + [[i["categoria"], i["nome"], i["quantidade"]] for i in resultados])
+    else:
+        style(put_text(f'⚠️ Nenhum item encontrado para "{pesquisa}".'), 'color: orange; font-weight: bold;')      
+
+def salvar_relatorio_excel():
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Estoque"
+
+    ws.append(["Categoria", "Item", "Quantidade"])
+
+    for item in itens:
+        ws.append([item["categoria"], item["nome"], item["quantidade"]])
+
+    wb.save("estoque.xlsx")
+    style(put_text("✅ Relatório salvo como 'estoque.xlsx'."), 'color: green; font-weight: bold;')    
+
+def salvar_relatorio_pdf():
+    c = canvas.Canvas("estoque.pdf", pagesize=letter)
+    c.setFont("Helvetica", 12)
+
+    c.drawString(200, 750, "Relatório de Estoque")
+
+    y_position = 730
+    for item in itens:
+        c.drawString(50, y_position, f"{item['categoria']} - {item['nome']} - {item['quantidade']}")
+        y_position -= 20
+
+        if y_position < 50:
+            c.showPage()
+            c.setFont("Helvetica", 12)
+            y_position = 750
+
+    c.save()
+    style(put_text("✅ Relatório salvo como 'estoque.pdf'."), 'color: green; font-weight: bold;')    
+
 # Menu principal
 def sistema_estoque_app():
     exibir_cabecalho()
@@ -130,6 +190,9 @@ def sistema_estoque_app():
             'Listar categorias',
             'Remover item',
             'Atualizar item',
+            'Pesquisar item',
+            'Salvar relatório Excel',
+            'Salvar relatório PDF',
             'Sair'
         ])
 
@@ -145,6 +208,12 @@ def sistema_estoque_app():
             remover_item()
         elif action == 'Atualizar item':
             atualizar_item()
+        elif action == 'Pesquisar item':
+            pesquisar_item()
+        elif action == 'Salvar relatório Excel':
+            salvar_relatorio_excel()
+        elif action == 'Salvar relatório PDF':
+            salvar_relatorio_pdf()             
         elif action == 'Sair':
             style(put_text("🔒 Saindo do sistema. Até mais!"), 'color: blue; font-weight: bold;')
             break
