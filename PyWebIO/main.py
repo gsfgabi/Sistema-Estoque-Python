@@ -191,8 +191,7 @@ def sistema_estoque_app():
             'Remover item',
             'Atualizar item',
             'Pesquisar item',
-            'Salvar relatório Excel',
-            'Salvar relatório PDF',
+            'Salvar relatório',
             'Sair'
         ])
 
@@ -210,10 +209,15 @@ def sistema_estoque_app():
             atualizar_item()
         elif action == 'Pesquisar item':
             pesquisar_item()
-        elif action == 'Salvar relatório Excel':
-            salvar_relatorio_excel()
-        elif action == 'Salvar relatório PDF':
-            salvar_relatorio_pdf()             
+        elif action == 'Salvar relatório':
+            formato_relatorio = select("Escolha o formato do relatório:", options=[
+                'Excel',
+                'PDF'
+            ])
+            if formato_relatorio == 'Excel':
+                salvar_relatorio_excel()
+            elif formato_relatorio == 'PDF':
+                salvar_relatorio_pdf()
         elif action == 'Sair':
             style(put_text("🔒 Saindo do sistema. Até mais!"), 'color: blue; font-weight: bold;')
             break
