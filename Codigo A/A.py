@@ -1,23 +1,39 @@
-
-# Sistema de gerenciamento de estoque - Ferramentas
 class Estoque:
+    """
+    Classe que representa o sistema de gerenciamento de estoque.
+    """
     def __init__(self):
-        self.estoque = {
+        self.estoque: Dict[str, List[str]] = {
             "ferramentas_manuais": ["martelo", "chave de fenda", "alicate", "serrote", "chave inglesa"],
             "ferramentas_eletricas": ["furadeira", "parafusadeira", "serra elétrica", "esmerilhadeira"],
             "materiais_construcao": ["cimento", "areia", "tijolo", "telha", "cal"],
             "equipamentos_seguranca": ["capacete", "luva", "óculos de proteção", "botina"],
         }
 
-    def item_existe(self, item):
+    def _validar_categoria(self, categoria: str) -> bool:
+        """
+        Verifica se uma categoria existe no estoque.
+        """
+        if categoria not in self.estoque:
+            print(f"A categoria '{categoria}' não existe no estoque.")
+            return False
+        return True
+
+    def item_existe(self, item: str) -> str:
+        """
+        Verifica se um item existe no estoque e retorna a categoria, se encontrado.
+        """
         for categoria, itens in self.estoque.items():
             if item in itens:
                 print(f"Item '{item}' encontrado na categoria '{categoria}'.")
                 return categoria
         print(f"Item '{item}' não encontrado no estoque.")
-        return None
+        return ""
 
-    def exibir_estoque(self):
+    def exibir_estoque(self) -> None:
+        """
+        Exibe o estoque completo, organizado por categoria.
+        """
         print("\n--- Estoque Atual ---")
         if not self.estoque:
             print("O estoque está vazio.")
@@ -26,24 +42,31 @@ class Estoque:
                 print(f"\n{categoria.capitalize()}:")
                 for item in itens:
                     print(f"- {item}")
-        print("\n")
 
-    def listar_categorias(self):
+    def listar_categorias(self) -> None:
+        """
+        Lista todas as categorias existentes no estoque.
+        """
         print("\n--- Categorias no Estoque ---")
         for categoria in self.estoque:
             print(f"- {categoria.capitalize()}")
-        print("\n")
 
-    def exibir_categoria(self, categoria):
-        if categoria in self.estoque:
+    def exibir_categoria(self, categoria: str) -> None:
+        """
+        Exibe os itens de uma categoria específica.
+        """
+        if self._validar_categoria(categoria):
             print(f"\nItens na categoria '{categoria}':")
             for item in self.estoque[categoria]:
                 print(f"- {item}")
-        else:
-            print(f"A categoria '{categoria}' não existe no estoque.")
-        print("\n")
 
-    def adicionar_item(self, categoria, item):
+    def adicionar_item(self, categoria: str, item: str) -> None:
+        """
+        Adiciona um item a uma categoria existente ou cria uma nova categoria.
+        """
+        if not categoria or not item:
+            print("Categoria e item não podem ser vazios.")
+            return
         if categoria in self.estoque:
             if item not in self.estoque[categoria]:
                 self.estoque[categoria].append(item)
@@ -51,32 +74,39 @@ class Estoque:
             else:
                 print(f"O item '{item}' já existe na categoria '{categoria}'.")
         else:
-            print(f"A categoria '{categoria}' não existe. Criando nova categoria.")
             self.estoque[categoria] = [item]
             print(f"Categoria '{categoria}' criada e item '{item}' adicionado.")
 
-    def remover_item(self, categoria, item):
-        if categoria in self.estoque:
+    def remover_item(self, categoria: str, item: str) -> None:
+        """
+        Remove um item de uma categoria. Remove a categoria se ela ficar vazia.
+        """
+        if self._validar_categoria(categoria):
             if item in self.estoque[categoria]:
                 self.estoque[categoria].remove(item)
                 print(f"Item '{item}' removido da categoria '{categoria}'.")
-                if not self.estoque[categoria]:  
+                if not self.estoque[categoria]:
                     del self.estoque[categoria]
                     print(f"Categoria '{categoria}' removida por estar vazia.")
             else:
                 print(f"Item '{item}' não encontrado na categoria '{categoria}'.")
-        else:
-            print(f"A categoria '{categoria}' não existe no estoque.")
 
-    def atualizar_item(self, categoria, item_antigo, item_novo):
-        if categoria in self.estoque and item_antigo in self.estoque[categoria]:
-            index = self.estoque[categoria].index(item_antigo)
-            self.estoque[categoria][index] = item_novo
-            print(f"Item '{item_antigo}' atualizado para '{item_novo}' na categoria '{categoria}'.")
-        else:
-            print(f"Item '{item_antigo}' não encontrado na categoria '{categoria}'.")
+    def atualizar_item(self, categoria: str, item_antigo: str, item_novo: str) -> None:
+        """
+        Atualiza um item dentro de uma categoria.
+        """
+        if self._validar_categoria(categoria):
+            if item_antigo in self.estoque[categoria]:
+                index = self.estoque[categoria].index(item_antigo)
+                self.estoque[categoria][index] = item_novo
+                print(f"Item '{item_antigo}' atualizado para '{item_novo}' na categoria '{categoria}'.")
+            else:
+                print(f"Item '{item_antigo}' não encontrado na categoria '{categoria}'.")
 
-    def relatorio_completo(self):
+    def relatorio_completo(self) -> None:
+        """
+        Gera um relatório completo do estoque, mostrando categorias e itens.
+        """
         print("\n--- Relatório Completo do Estoque ---")
         total_itens = sum(len(itens) for itens in self.estoque.values())
         print(f"Total de categorias: {len(self.estoque)}")
@@ -85,10 +115,12 @@ class Estoque:
             print(f"\nCategoria '{categoria.capitalize()}':")
             for item in itens:
                 print(f"- {item}")
-        print("\n")
 
 
-def menu_principal():
+def menu_principal() -> None:
+    """
+    Menu interativo para o sistema de estoque.
+    """
     sistema_estoque = Estoque()
 
     while True:
@@ -102,27 +134,27 @@ def menu_principal():
         print("7. Exibir relatório completo")
         print("8. Sair")
 
-        opcao = input("Escolha uma opção: ")
+        opcao = input("Escolha uma opção: ").strip()
 
         if opcao == "1":
             sistema_estoque.exibir_estoque()
         elif opcao == "2":
             sistema_estoque.listar_categorias()
         elif opcao == "3":
-            categoria = input("Digite o nome da categoria: ").lower()
+            categoria = input("Digite o nome da categoria: ").lower().strip()
             sistema_estoque.exibir_categoria(categoria)
         elif opcao == "4":
-            categoria = input("Digite a categoria para adicionar o item: ").lower()
-            item = input("Digite o nome do item que deseja adicionar: ").lower()
+            categoria = input("Digite a categoria para adicionar o item: ").lower().strip()
+            item = input("Digite o nome do item que deseja adicionar: ").lower().strip()
             sistema_estoque.adicionar_item(categoria, item)
         elif opcao == "5":
-            categoria = input("Digite a categoria do item que deseja remover: ").lower()
-            item = input("Digite o nome do item que deseja remover: ").lower()
+            categoria = input("Digite a categoria do item que deseja remover: ").lower().strip()
+            item = input("Digite o nome do item que deseja remover: ").lower().strip()
             sistema_estoque.remover_item(categoria, item)
         elif opcao == "6":
-            categoria = input("Digite a categoria do item: ").lower()
-            item_antigo = input("Digite o nome do item a ser atualizado: ").lower()
-            item_novo = input("Digite o novo nome do item: ").lower()
+            categoria = input("Digite a categoria do item: ").lower().strip()
+            item_antigo = input("Digite o nome do item a ser atualizado: ").lower().strip()
+            item_novo = input("Digite o novo nome do item: ").lower().strip()
             sistema_estoque.atualizar_item(categoria, item_antigo, item_novo)
         elif opcao == "7":
             sistema_estoque.relatorio_completo()

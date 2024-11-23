@@ -55,10 +55,6 @@ def login():
 
 
 # Funções de operações
-def criar_categoria():
-    categoria = input("Digite o nome da nova categoria:", type=TEXT)
-    categorias.append(categoria)
-    style(put_text(f'✅ Categoria "{categoria}" criada com sucesso.'), 'color: green; font-weight: bold;')
 
 def adicionar_item():
     if not categorias:
@@ -184,32 +180,26 @@ def sistema_estoque_app():
     while True:
         action = select("Escolha uma ação:", options=[
             'Escolha uma ação:',
-            'Criar categoria',
-            'Adicionar item',
             'Exibir estoque completo',
             'Listar categorias',
+            'Adicionar item',
             'Remover item',
             'Atualizar item',
-            'Pesquisar item',
-            'Salvar relatório',
+            'Salvar relatório completo',
             'Sair'
         ])
 
-        if action == 'Criar categoria':
-            criar_categoria()
-        elif action == 'Adicionar item':
-            adicionar_item()
-        elif action == 'Exibir estoque completo':
+        if action == 'Exibir estoque completo':
             exibir_estoque()
         elif action == 'Listar categorias':
             listar_categorias()
+        elif action == 'Adicionar item':
+            adicionar_item()
         elif action == 'Remover item':
             remover_item()
         elif action == 'Atualizar item':
             atualizar_item()
-        elif action == 'Pesquisar item':
-            pesquisar_item()
-        elif action == 'Salvar relatório':
+        elif action == 'Salvar relatório completo':
             formato_relatorio = select("Escolha o formato do relatório:", options=[
                 'Excel',
                 'PDF'
