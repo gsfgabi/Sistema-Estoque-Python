@@ -29,7 +29,7 @@ def test_estoque_padrao(estoque_teste):
 def test_adicionar_item_com_resposta_usuario(estoque_teste):
     """Testa a adição de um item em uma categoria inexistente com a interação do usuário."""
     # Simulando o input do usuário (1 para sim, 2 para não)
-    with mock.patch('builtins.input', return_value='1'):  # Simulando a resposta '1' (Sim)
+    with mock.patch('builtins.input', return_value='1'):  
         estoque_teste.adicionar_item("materiais_invalidos", "prego")
     
     # Verifica se a categoria foi criada e o item foi adicionado
@@ -40,7 +40,7 @@ def test_adicionar_item_com_resposta_usuario(estoque_teste):
 def test_adicionar_item_categoria_nao_adicionar(estoque_teste):
     """Testa a adição de um item em uma categoria inexistente com a resposta do usuário 'não'."""
     # Simulando o input do usuário (2 para não)
-    with mock.patch('builtins.input', return_value='2'):  # Simulando a resposta '2' (Não)
+    with mock.patch('builtins.input', return_value='2'):  
         estoque_teste.adicionar_item("materiais_invalidos", "prego")
     
     # Verifica se a categoria não foi criada e o item não foi adicionado

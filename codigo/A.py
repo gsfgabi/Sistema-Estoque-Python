@@ -33,7 +33,6 @@ class Estoque:
         }
 
     def carregar_estoque(self):
-        """Carrega o estoque do arquivo JSON ou cria um novo se não existir."""
         if os.path.exists(self.arquivo):
             try:
                 with open(self.arquivo, "r") as f:
@@ -48,12 +47,21 @@ class Estoque:
         return estoque
 
     def salvar_estoque(self, estoque=None):
-        """Salva o estoque no arquivo JSON."""
         if estoque is None:
             estoque = self.estoque
         with open(self.arquivo, "w") as f:
             json.dump(estoque, f, indent=4)
         print(f"Estoque salvo no arquivo '{self.arquivo}'.")
+
+    def _validar_categoria(self, categoria: str) -> bool:
+        """
+        Verifica se uma categoria existe no estoque.
+        """
+        if categoria not in self.estoque:
+            print(f"A categoria '{categoria}' não existe no estoque.")
+            return False
+        return True
+    
 
     def item_existe(self, item):
         item = item.strip().lower()
@@ -64,7 +72,7 @@ class Estoque:
         print(f"Item '{item}' não encontrado no estoque.")
         return None
 
-    def exibir_estoque(self):
+    def exibir_estoque(self):  
         print("\n--- Estoque Atual ---")
         if not self.estoque:
             print("O estoque está vazio.")
@@ -92,9 +100,6 @@ class Estoque:
         print("\n")
 
     def adicionar_item(self, categoria: str, item: str) -> None:
-        """
-        Adiciona um item a uma categoria existente ou cria uma nova categoria, com a opção de confirmação do usuário.
-        """
         categoria = categoria.strip().lower()
         item = item.strip().lower()
 
@@ -113,11 +118,9 @@ class Estoque:
             )
 
             if resposta == "1":
-                # Se o usuário escolher 'Sim', cria a categoria e adiciona o item
                 self.estoque[categoria] = [item]
                 print(f"Categoria '{categoria}' criada e item '{item}' adicionado.")
             elif resposta == "2":
-                # Se o usuário escolher 'Não', apenas informa que nada será feito
                 print(
                     f"A categoria '{categoria}' não foi criada e o item '{item}' não foi adicionado."
                 )
@@ -130,7 +133,6 @@ class Estoque:
         self.salvar_estoque()
 
     def remover_item(self, categoria, item):
-        """Remove um item de uma categoria no estoque."""
         if categoria in self.estoque:
             itens = self.estoque[categoria]
             item_lower = item.lower()
